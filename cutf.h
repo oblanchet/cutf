@@ -43,7 +43,7 @@ size_t wchartoutf8(const wchar_t* s, size_t inSize, char* out, size_t outsize);
 //
 // utf8 zero terminated function
 //
-size_t wchartoutf8z(const wchar_t* s, char* out, size_t outsize);
+size_t wcharztoutf8(const wchar_t* s, char* out, size_t outsize);
 
 int      cutf_is_valid(uint8_t* start, uint8_t* end);
 int      cutf_starts_with_bom(uint8_t* start, uint8_t* end);

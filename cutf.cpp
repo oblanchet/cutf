@@ -456,7 +456,7 @@ size_t wchartoutf8(const wchar_t* s, size_t inSize, char* out, size_t outsize)
         return cutf_32to8((uint32_t*)start, (uint32_t*)end, (uint8_t*)out, outsize);
 }
 
-size_t wchartoutf8z(const wchar_t* s, char* out, size_t outsize)
+size_t wcharztoutf8(const wchar_t* s, char* out, size_t outsize)
 {
     return wchartoutf8(s, SIZE_MAX, out, outsize);
 }
@@ -485,7 +485,7 @@ std::string widetoutf8(const wchar_t* ws)
     return s;
 }
 
-std::string widetoutf8(const std::wstring& ws)
+std::string wchartoutf8(const std::wstring& ws)
 {
     return widetoutf8(ws.c_str());
 }
