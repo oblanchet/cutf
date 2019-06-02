@@ -485,7 +485,7 @@ std::string widetoutf8(const wchar_t* ws)
     return s;
 }
 
-std::string wchartoutf8(const std::wstring& ws)
+std::string widetoutf8(const std::wstring& ws)
 {
     return widetoutf8(ws.c_str());
 }
