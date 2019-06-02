@@ -437,6 +437,11 @@ size_t utf8ztowchar(const char* s, wchar_t* out, size_t outsize)
     return utf8towchar(s, SIZE_MAX, out, outsize);
 }
 
+size_t utf8zlength(const wchar_t* ws)
+{
+    return wchartoutf8(ws, SIZE_MAX, NULL, 0);
+}
+
 //
 //  Converts wide string to utf-8 string.
 //

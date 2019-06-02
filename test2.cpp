@@ -23,9 +23,12 @@ int checkOk( bool b, const char* statement )
 
 int simpleStringTest()
 {
-    const wchar_t* chineseText = L"主体";
-    auto s = widetoutf8(chineseText);
     size_t r = 0;
+    const wchar_t* chineseText = L"主体";
+
+    ok(utf8zlength(chineseText) == 7);
+
+    auto s = widetoutf8(chineseText);
 
     printf("simple string test:  ");
 
