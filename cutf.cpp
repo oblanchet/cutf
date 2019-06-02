@@ -178,9 +178,6 @@ extern "C"
 {
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
-/// API
-////////////////////////////////////////////////////////////////////////////////
 uint8_t* cutf_find_invalid(uint8_t* start, uint8_t* end)
 {
     uint8_t* result = start;
@@ -435,6 +432,11 @@ size_t utf8towchar(const char* s, size_t inSize, wchar_t* out, size_t outsize)
     return destLen + 1 /* zero termination */;
 }
 
+size_t utf8ztowchar(const char* s, wchar_t* out, size_t outsize)
+{
+    return utf8towchar(s, SIZE_MAX, out, outsize);
+}
+
 //
 //  Converts wide string to utf-8 string.
 //
@@ -452,6 +454,11 @@ size_t wchartoutf8(const wchar_t* s, size_t inSize, char* out, size_t outsize)
         return cutf_16to8((uint16_t*)start, (uint16_t*)end, (uint8_t*)out, outsize);
     else
         return cutf_32to8((uint32_t*)start, (uint32_t*)end, (uint8_t*)out, outsize);
+}
+
+size_t wchartoutf8z(const wchar_t* s, char* out, size_t outsize)
+{
+    return wchartoutf8(s, SIZE_MAX, out, outsize);
 }
 
 #ifdef __cplusplus

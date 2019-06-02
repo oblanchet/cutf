@@ -51,6 +51,9 @@ int simpleStringTest()
     wchartoutf8(L"test", SIZE_MAX, cbuf, sizeof(cbuf));
     ok(cbuf[4] == 0);
 
+    utf8ztowchar("test2", wbuf, sizeof(wbuf));
+    ok(memcmp(L"test2", wbuf, sizeof(wchar_t) * 5) == 0);
+
     return (int)r;
 }
 
