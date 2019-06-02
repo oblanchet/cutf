@@ -26,18 +26,21 @@ int simpleStringTest()
     size_t r = 0;
     const wchar_t* chineseText = L"主体";
 
-    ok(utf8zlength(chineseText) == 7);
+    ok(wcharzlength(chineseText) == 7);
 
     auto s = widetoutf8(chineseText);
 
     printf("simple string test:  ");
 
     ok( s.length() == 6 );
-    uint8_t utf8_array[] = { 0xE4, 0xB8, 0xBB, 0xE4, 0xBD, 0x93 };
+    uint8_t utf8_array[] = { 0xE4, 0xB8, 0xBB, 0xE4, 0xBD, 0x93, 0 };
 
     for(int i = 0; i < 6; i++)
         ok(((uint8_t)s[i]) == utf8_array[i]);
 
+    // 2 chars + zero
+    ok(utf8zlength((char*)utf8_array) == 3);
+    
     auto ws = utf8towide(s);
     ok(ws.length() == 2);
     ok(ws == chineseText);
