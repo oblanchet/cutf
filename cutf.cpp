@@ -238,10 +238,14 @@ uint8_t* cutf_append(uint32_t cp, uint8_t* result, size_t* remain)
     return result;
 }
 
-uint32_t cutf_next(uint8_t** it)
+uint32_t cutf_next(uint8_t** it, size_t* remain)
 {
     uint32_t cp = CUTF_MASK8(**it);
     size_t length = cutf_sequence_length(*it);
+
+    if(remain)
+        *remain -= length;
+
     switch (length) {
         case 1:
             break;
@@ -270,7 +274,7 @@ uint32_t cutf_next(uint8_t** it)
 
 uint32_t cutf_peek_next(uint8_t* it)
 {
-    return cutf_next(&it);
+    return cutf_next(&it, nullptr);
 }
 
 uint32_t cutf_prior(uint8_t** it)
@@ -279,19 +283,11 @@ uint32_t cutf_prior(uint8_t** it)
     return cutf_peek_next(*it);
 }
 
-void cutf_advance(uint8_t** it, size_t n)
-{
-    size_t i;
-    for(i = 0; i < n; ++i) {
-        cutf_next(it);
-    }
-}
-
 size_t cutf_distance(uint8_t* first, uint8_t* last)
 {
     size_t dist;
     for(dist = 0; first < last; ++dist) {
-        cutf_next(&first);
+        cutf_next(&first, nullptr);
     }
     return dist;
 }
@@ -316,14 +312,15 @@ size_t cutf_16to8(uint16_t* start, uint16_t* end, uint8_t* out, size_t outsize)
     if(outsize != 0)
         *it = 0;        //Zero terminate
 
+    it++;
     return PTR_DIFF_(it,out);
 }
 
-size_t cutf_8to16(uint8_t* start, uint8_t* end, uint16_t* out)
+size_t cutf_8to16(uint8_t* start, uint8_t* end, uint16_t* out, size_t outsize)
 {
     uint16_t* it = out;
     while(start < end) {
-        uint32_t cp = cutf_next(&start);
+        uint32_t cp = cutf_next(&start, &outsize);
         if(cp > 0xffff) { //make a surrogate pair
             *(it++) = (uint16_t)((cp >> 10)   + CUTF_LEAD_OFFSET);
             *(it++) = (uint16_t)((cp & 0x3ff) + CUTF_TRAIL_SURROGATE_MIN);
@@ -331,6 +328,11 @@ size_t cutf_8to16(uint8_t* start, uint8_t* end, uint16_t* out)
             *(it++) = (uint16_t)(cp);
         }
     }
+
+    if (outsize != 0)
+        *it = 0;        //Zero terminate
+
+    it++;
     return PTR_DIFF_(it, out);
 }
 
@@ -345,15 +347,19 @@ size_t cutf_32to8(uint32_t* start, uint32_t* end, uint8_t* out, size_t outsize)
     if( outsize != 0)
         *it = 0;        //Zero terminate
 
+    it++;
     return PTR_DIFF_(it, out);
 }
 
-size_t cutf_8to32(uint8_t* start, uint8_t* end, uint32_t* out)
+size_t cutf_8to32(uint8_t* start, uint8_t* end, uint32_t* out, size_t outsize)
 {
     uint32_t* it = out;
-    for(; start < end; ++it) {
-        *it = cutf_next(&start);
-    }
+
+    for(; start < end; ++it)
+        *it = cutf_next(&start, &outsize);
+
+    *it = 0;    // Zero termination
+
     return PTR_DIFF_(it, out);
 }
 
@@ -402,7 +408,7 @@ size_t cutf_default_replace_invalid(uint8_t* start, uint8_t* end, uint8_t* out, 
 //
 //  returns target string length.
 //
-size_t utf8towchar(const char* s, size_t inSize, wchar_t* out, size_t bufSize)
+size_t utf8towchar(const char* s, size_t inSize, wchar_t* out, size_t outsize)
 {
     uint8_t* start = (uint8_t*) s;
     if (inSize == SIZE_MAX)
@@ -413,20 +419,20 @@ size_t utf8towchar(const char* s, size_t inSize, wchar_t* out, size_t bufSize)
     size_t destLen = cutf_distance(start, end);
 
     // Insufficient buffer size
-    if (destLen > bufSize)
+    if (destLen > outsize)
     {
-        if (bufSize != 0)
+        if (outsize != 0)
             *out = 0;
     
-        return destLen;
+        return destLen + 1 /* zero termination */;
     }
 
     if (sizeof(wchar_t) == 2)
-        cutf_8to16(start, end, (uint16_t*)out);
+        cutf_8to16(start, end, (uint16_t*)out, outsize);
     else
-        cutf_8to32(start, end, (uint32_t*)out);
+        cutf_8to32(start, end, (uint32_t*)out, outsize);
 
-    return destLen;
+    return destLen + 1 /* zero termination */;
 }
 
 //
@@ -454,8 +460,8 @@ size_t wchartoutf8(const wchar_t* s, size_t inSize, char* out, size_t outsize)
 std::wstring utf8towide(const char* s)
 {
     std::wstring ws;
-    ws.resize(utf8towchar(s, SIZE_MAX, nullptr, 0));
-    utf8towchar(s, SIZE_MAX, &ws[0], ws.capacity());
+    ws.resize(utf8towchar(s, SIZE_MAX, nullptr, 0) - 1);
+    utf8towchar(s, SIZE_MAX, &ws[0], ws.length());
     return ws;
 }
 
@@ -467,8 +473,8 @@ std::wstring utf8towide(const std::string& s)
 std::string widetoutf8(const wchar_t* ws)
 {
     std::string s;
-    s.resize(wchartoutf8(ws, SIZE_MAX, nullptr, 0));
-    wchartoutf8(ws, SIZE_MAX, &s[0], s.capacity());
+    s.resize(wchartoutf8(ws, SIZE_MAX, nullptr, 0) - 1);
+    wchartoutf8(ws, SIZE_MAX, &s[0], s.length());
     return s;
 }
 

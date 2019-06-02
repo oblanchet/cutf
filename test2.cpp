@@ -1,11 +1,25 @@
 ﻿#include "cutf.h"
+#ifdef _WIN32
+    #include <windows.h>
+    #include <debugapi.h>
+#endif
 
-#define ok(statement)                                       \
-    if( !(statement) )                                      \
-    {                                                       \
-        printf("Failed statement: %s\n", #statement);       \
-        r = 1;                                              \
-    }
+#define ok(statement) \
+    r |= checkOk(statement, #statement);
+
+int checkOk( bool b, const char* statement )
+{
+    if (b)
+        return 0;
+
+#ifdef _WIN32
+    if (IsDebuggerPresent())
+        DebugBreak();
+#endif
+
+    printf("Failed statement: %s\n", statement);
+    return 1;
+}
 
 int simpleStringTest()
 {
@@ -27,6 +41,15 @@ int simpleStringTest()
 
     if( r == 0 )
         printf("ok.\n");
+
+    // Zero termination
+    wchar_t wbuf[20];
+    utf8towchar("test", SIZE_MAX, wbuf, sizeof(wbuf));
+    ok(wbuf[4] == 0);
+
+    char cbuf[20];
+    wchartoutf8(L"test", SIZE_MAX, cbuf, sizeof(cbuf));
+    ok(cbuf[4] == 0);
 
     return (int)r;
 }

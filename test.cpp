@@ -35,7 +35,7 @@ int roundtrip_16(uint8_t* original, uint8_t* copy, size_t size, size_t count)
 {
     size_t written;
     uint16_t* temp = (uint16_t*)calloc(count*2, sizeof(uint16_t));
-    written = cutf_8to16(original, original+size, temp);
+    written = cutf_8to16(original, original+size, temp, count*2);
     written = cutf_16to8(temp, temp+written, copy, size * 2);
     free(temp);
     return check("roundtrip_16", original, copy, size);
@@ -45,7 +45,7 @@ int roundtrip_32(uint8_t* original, uint8_t* copy, size_t size, size_t count)
 {
     size_t written;
     uint32_t* temp = (uint32_t*)calloc(count, sizeof(uint32_t));
-    written = cutf_8to32(original, original+size, temp);
+    written = cutf_8to32(original, original+size, temp, count);
     written = cutf_32to8(temp, temp+written, copy, size * 2);
     free(temp);
     return check("roundtrip_32", original, copy, size);
@@ -71,7 +71,7 @@ int testfile(const char* path, bool expectInvalidChars = false)
             }
         }
 
-        count = cutf_distance(original, original+size);
+        count = cutf_distance(original, original+size) + 1 /* zero fill */;
         if(count) {
             r |= roundtrip_16(original, copy, size, count);
             printf(".");
