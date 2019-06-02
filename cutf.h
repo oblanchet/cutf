@@ -18,9 +18,9 @@ extern "C"
 //----------------------------------------------------------------------------------------
 
 //
-//  Estimates how much buffer length is required to convert utf-8 to wchar_t
+//  Estimates how much buffer length is required to convert utf-8 to wchar_t (string length + 1)
 //
-size_t utf8zlength(const char* s);
+size_t utf8zestimate(const char* s);
 
 //
 //  Converts utf-8 string to wide version.
@@ -38,9 +38,9 @@ size_t utf8ztowchar(const char* s, wchar_t* out, size_t outsize);
 
 
 //
-//  Estimates how much buffer length is required to convert wide string to utf-8.
+//  Estimates how much many elements in characters is required to convert wide string to utf-8 (string length + 1)
 //
-size_t wcharzlength(const wchar_t* ws);
+size_t wcharzestimate(const wchar_t* ws);
 
 //
 //  Converts wide string to utf-8 string.

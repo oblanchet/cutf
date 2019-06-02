@@ -26,7 +26,7 @@ int simpleStringTest()
     size_t r = 0;
     const wchar_t* chineseText = L"主体";
 
-    ok(wcharzlength(chineseText) == 7);
+    ok(wcharzestimate(chineseText) == 7);
 
     auto s = widetoutf8(chineseText);
 
@@ -39,7 +39,7 @@ int simpleStringTest()
         ok(((uint8_t)s[i]) == utf8_array[i]);
 
     // 2 chars + zero
-    ok(utf8zlength((char*)utf8_array) == 3);
+    ok(utf8zestimate((char*)utf8_array) == 3);
     
     auto ws = utf8towide(s);
     ok(ws.length() == 2);
